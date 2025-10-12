@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Email me</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f5f0" />
+    <link rel="icon" href="favicon.ico" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Email Me" />
+    <link rel="manifest" href="manifest.json" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 1rem;
+        background: #f5f5f0;
+      }
+      .container {
+        background: #f5f5f0;
+        padding: 1.5rem;
+        border-radius: 20px;
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+      }
+      h1 {
+        color: #333;
+        margin: 0 0 1.5rem 0;
+        font-size: 1.8rem;
+      }
+      .input-group {
+        margin-bottom: 1rem;
+        text-align: left;
+      }
+      label {
+        display: block;
+        color: #555;
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+        font-weight: 500;
+      }
+      input {
+        width: 100%;
+        padding: 0.7rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+      }
+      input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+      #qrcode {
+        display: inline-block;
+        padding: 1rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-top: 1rem;
+      }
+      #qrcode canvas {
+        display: block;
+      }
+      .footer {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        font-size: 0.8rem;
+      }
+      .footer a {
+        color: #000;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .footer a:hover {
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Email me</h1>
+
+      <div class="input-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="your@email.com" value="" />
+      </div>
+
+      <div class="input-group">
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" placeholder="Enter subject" />
+      </div>
+
+      <div id="qrcode">
+        <div style="width: 240px; height: 240px"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <a href="https://example.com" target="_blank">code</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+      const emailInput = document.getElementById("email");
+      emailInput.value = localStorage.getItem("email") || "";
+      const subjectInput = document.getElementById("subject");
+      subjectInput.value = localStorage.getItem("subject") || "hello";
+      const qrcodeContainer = document.getElementById("qrcode");
+      let qrcodeInstance = null;
+
+      function update() {
+        const email = emailInput.value;
+        const subject = subjectInput.value || "";
+
+        // Clear previous QR code
+        qrcodeContainer.innerHTML = "";
+
+        if (email && email.length) {
+          // Generate new QR code
+          new QRCode(qrcodeContainer, {
+            text: `mailto:${email}?subject=${encodeURIComponent(subject)}`,
+            width: 240,
+            height: 240,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H,
+          });
+        } else {
+          // 240x240 white box
+          qrcodeContainer.innerHTML =
+            "<div style='width: 240px; height: 240px;'></div>";
+        }
+
+        // Store values in memory
+        email && email.length && localStorage.setItem("email", email);
+        subject.length && localStorage.setItem("subject", subject);
+      }
+
+      // Generate initial QR code
+      update();
+
+      // Regenerate QR code on input change
+      emailInput.addEventListener("input", update);
+      subjectInput.addEventListener("input", update);
+
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js");
+      });
+    </script>
+  </body>
+</html>
