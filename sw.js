@@ -1,4 +1,4 @@
-const CACHE_NAME = 'email-me-v2';
+const CACHE_NAME = 'email-me-v3';
 const urlsToCache = [
   '/',
   '/index.html',
