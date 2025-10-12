@@ -6,26 +6,29 @@
 #     "cairosvg",
 # ]
 # ///
-from PIL import Image
-import cairosvg
 import io
+from pathlib import Path
+
+import cairosvg
+from PIL import Image
 
 # Create icons in multiple sizes
 sizes = [192, 512]
+THIS_DIR = Path(__file__).parent
 
 for size in sizes:
     # Create a square image with transparent background
     img = Image.new("RGBA", (size, size), color=(0, 0, 0, 0))
 
-    # Calculate envelope dimensions (70% of image size, centered)
-    envelope_size = int(size * 0.7)
+    # Calculate envelope dimensions (85% of image size, centered)
+    envelope_size = int(size * 0.85)
     padding = (size - envelope_size) // 2
 
     # Convert SVG to PNG at the desired size
     png_data = cairosvg.svg2png(
-        url="envelope.svg",
+        url=str(THIS_DIR / "envelope.svg"),
         output_width=envelope_size,
-        output_height=envelope_size
+        output_height=envelope_size,
     )
 
     # Load the PNG data
