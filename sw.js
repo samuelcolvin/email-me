@@ -1,8 +1,10 @@
-const CACHE_NAME = 'email-me-v5';
+const CACHE_NAME = 'email-me-v6';
 const urlsToCache = [
   '/',
   '/index.html',
   '/favicon.ico',
+  '/icon-192.png',
+  '/icon-512.png',
   '/manifest.json',
   'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
 ];
