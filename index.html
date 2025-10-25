@@ -91,6 +91,73 @@
       .footer a:hover {
         color: #555;
       }
+      .toggle-group {
+        margin: 1.5rem 0 1rem 0;
+        text-align: left;
+      }
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.4rem;
+      }
+      .toggle-label {
+        color: #555;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+      .toggle-description {
+        color: #888;
+        font-size: 0.75rem;
+        line-height: 1.3;
+      }
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 26px;
+      }
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.3s;
+        border-radius: 26px;
+        border: none;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: #667eea;
+      }
+      input:checked + .slider:before {
+        transform: translateX(24px);
+      }
+      .scheme-text {
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: #667eea;
+        font-weight: 600;
+        min-width: 120px;
+      }
     </style>
   </head>
   <body>
@@ -105,6 +172,20 @@
       <div class="input-group">
         <label for="subject">Subject</label>
         <input type="text" id="subject" placeholder="Enter subject" />
+      </div>
+
+      <div class="toggle-group">
+        <div class="toggle-row">
+          <span class="toggle-label">Mail / Gmail</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="useGmail" />
+            <span class="slider"></span>
+          </label>
+          <span class="scheme-text" id="schemeDisplay">mailto:</span>
+        </div>
+        <div class="toggle-description">
+          Necessary for users with only the gmail app on iPhone
+        </div>
       </div>
 
       <div id="qrcode">
@@ -124,20 +205,30 @@
       emailInput.value = localStorage.getItem("email") || "";
       const subjectInput = document.getElementById("subject");
       subjectInput.value = localStorage.getItem("subject") || "hello";
+      const useGmailToggle = document.getElementById("useGmail");
+      const schemeDisplay = document.getElementById("schemeDisplay");
       const qrcodeContainer = document.getElementById("qrcode");
-      let qrcodeInstance = null;
+
+      // Load useGmail preference from localStorage
+      const savedUseGmail = localStorage.getItem("useGmail") === "true";
+      useGmailToggle.checked = savedUseGmail;
+      schemeDisplay.textContent = savedUseGmail ? "Gmail" : "Mail";
 
       function update() {
         const email = emailInput.value;
         const subject = subjectInput.value || "";
+        const useGmail = useGmailToggle.checked;
 
         // Clear previous QR code
         qrcodeContainer.innerHTML = "";
 
-        if (email && email.length) {
-          // Generate new QR code
+        if (email?.length) {
+          // Generate new QR code with the selected scheme
+          const sub = encodeURIComponent(subject);
           new QRCode(qrcodeContainer, {
-            text: `mailto:${email}?subject=${encodeURIComponent(subject)}`,
+            text: useGmail
+              ? `googlegmail://co?to=${email}&subject=${sub}`
+              : `mailto:${email}?subject=${sub}`,
             width: 280,
             height: 280,
             colorDark: "#000000",
@@ -150,8 +241,14 @@
         }
 
         // Store values in memory
-        email && email.length && localStorage.setItem("email", email);
+        email?.length && localStorage.setItem("email", email);
         subject.length && localStorage.setItem("subject", subject);
+        localStorage.setItem("useGmail", useGmail);
+      }
+
+      function updateSchemeDisplay() {
+        schemeDisplay.textContent = useGmailToggle.checked ? "Gmail" : "Mail";
+        update();
       }
 
       // Generate initial QR code
@@ -160,10 +257,11 @@
       // Regenerate QR code on input change
       emailInput.addEventListener("input", update);
       subjectInput.addEventListener("input", update);
+      useGmailToggle.addEventListener("change", updateSchemeDisplay);
 
-      // window.addEventListener("load", () => {
-      //   navigator.serviceWorker.register("/sw.js");
-      // });
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js");
+      });
     </script>
   </body>
 </html>
